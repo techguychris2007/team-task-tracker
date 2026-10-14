@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Task Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Team Task Tracker</h1>
+      <p>Create tasks, assign teammates, and track progress.</p>
+    </header>
+    <section id="team-access" class="panel">
+  <h2>Open your team board</h2>
+
+  <form id="team-access-form">
+    <div class="field">
+      <label for="team-key">Team key</label>
+      <input
+        id="team-key"
+        type="password"
+        autocomplete="off"
+        required
+      >
+    </div>
+
+    <button type="submit">Open board</button>
+  </form>
+</section>
+
+<div id="workspace" hidden>
+  <button id="sign-out" type="button">Sign out</button>
+
+    <section class="panel" aria-labelledby="form-title">
+      <h2 id="form-title">Create a task</h2>
+
+      <form id="task-form">
+        <div class="field">
+          <label for="title">Task title</label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            maxlength="100"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="description">Description (optional)</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="3"
+            maxlength="2000"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="assignee">Assigned to</label>
+          <input
+            id="assignee"
+            name="assignee"
+            type="text"
+            maxlength="100"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="status">Starting status</label>
+          <select id="status" name="status">
+            <option value="todo">To do</option>
+            <option value="in_progress">In progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        <button type="submit" disabled>Add task</button>
+        <button id="cancel-edit" type="button" hidden>Cancel editing</button>
+      </form>
+
+    <p id="form-status" role="status"></p>
+    </section>
+
+    <section aria-labelledby="board-title">
+      <h2 id="board-title">Team board</h2>
+      <p id="progress-summary" role="status"></p>
+
+<div class="field">
+  <label for="assignee-filter">Filter by assignee</label>
+  <input
+    id="assignee-filter"
+    type="search"
+    placeholder="Enter a teammate's name"
+  >
+</div>
+<button id="refresh-board" type="button">
+  Refresh board
+</button>
+      <div class="board">
+        <section class="column" aria-labelledby="todo-title">
+          <h3 id="todo-title">To do</h3>
+          <div id="todo-tasks" class="task-list">
+            <p class="empty">No tasks yet.</p>
+          </div>
+        </section>
+
+        <section class="column" aria-labelledby="progress-title">
+          <h3 id="progress-title">In progress</h3>
+          <div id="in-progress-tasks" class="task-list">
+            <p class="empty">No tasks yet.</p>
+          </div>
+        </section>
+
+        <section class="column" aria-labelledby="done-title">
+          <h3 id="done-title">Done</h3>
+          <div id="done-tasks" class="task-list">
+            <p class="empty">No tasks yet.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+    </div>
+  </main>
+</body>
+</html>
