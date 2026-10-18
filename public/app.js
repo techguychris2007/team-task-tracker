@@ -1,3 +1,14 @@
+let teamKey = "";
+const accessPanel = document.querySelector("#team-access");
+const workspace = document.querySelector("#workspace");
+const accessMessage = document.createElement("p");
+accessMessage.setAttribute("role", "status");
+accessPanel.append(accessMessage);
+async function teamFetch(url, options = {}) {
+  const headers = new Headers(options.headers);
+  headers.set("Authorization", `Bearer ${teamKey}`);
+  return fetch(url, { ...options, headers });
+}
 const form = document.querySelector("#task-form");
 const statusMessage = document.querySelector("#form-status");
 const submitButton = form.querySelector('button[type="submit"]');
@@ -31,7 +42,10 @@ cancelEditButton.addEventListener("click", function () {
 });
 function renderBoard() {
   for (const column of Object.values(columns)) column.replaceChildren();
-  for (const task of tasks) {
+  const done = tasks.filter(task => task.status === "done").length;
+  document.querySelector("#progress-summary").textContent = `${done} of ${tasks.length} tasks completed.`;
+  const filter = document.querySelector("#assignee-filter").value.trim().toLowerCase();
+  for (const task of tasks.filter(task => task.assignee.toLowerCase().includes(filter))) {
     const card = document.createElement("article");
     card.className = "task-card";
     const title = document.createElement("h4");
@@ -67,7 +81,7 @@ function renderBoard() {
       setBusy(true);
       statusMessage.textContent = "Updating task...";
       try {
-        const response = await fetch(`/api/tasks/${task.id}/status`, {
+        const response = await teamFetch(`/api/tasks/${task.id}/status`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: statusSelect.value })
@@ -120,7 +134,7 @@ function renderBoard() {
   }
 }
 async function loadTasks() {
-  const response = await fetch("/api/tasks");
+  const response = await teamFetch("/api/tasks");
   const result = await response.json();
   if (!response.ok) throw new Error(result.message || "Could not load tasks.");
   tasks = result.tasks;
@@ -145,7 +159,7 @@ form.addEventListener("submit", async function (event) {
   setBusy(true);
   statusMessage.textContent = "Saving task...";
   try {
-    const response = await fetch(url, {
+    const response = await teamFetch(url, {
       method: isEditing ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task)
@@ -179,4 +193,39 @@ async function initializeBoard() {
     console.error(error);
   }
 }
-initializeBoard();
+document.querySelector("#team-access-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = event.currentTarget.querySelector("button");
+  button.disabled = true;
+  teamKey = document.querySelector("#team-key").value.trim();
+  accessMessage.textContent = "Opening board...";
+  try {
+    await loadTasks();
+    accessPanel.hidden = true;
+    workspace.hidden = false;
+    document.querySelector("#team-key").value = "";
+    statusMessage.textContent = "";
+    setBusy(false);
+    accessMessage.textContent = "";
+  } catch (error) {
+    teamKey = "";
+    accessMessage.textContent = error.message || "Could not open board. Check the server and team key.";
+  } finally { button.disabled = false; }
+});
+document.querySelector("#sign-out").addEventListener("click", () => {
+  if (saving) return;
+  teamKey = "";
+  tasks = [];
+  resetEditor();
+  renderBoard();
+  workspace.hidden = true;
+  accessPanel.hidden = false;
+});
+document.querySelector("#assignee-filter").addEventListener("input", renderBoard);
+document.querySelector("#refresh-board").addEventListener("click", async () => {
+  if (saving) return;
+  setBusy(true);
+  try { await loadTasks(); statusMessage.textContent = "Board refreshed."; }
+  catch (error) { statusMessage.textContent = error.message; }
+  finally { setBusy(false); }
+});

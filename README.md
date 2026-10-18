@@ -65,3 +65,14 @@ Do not upload .env or local database files.
 This demo uses a shared key and named assignees,
 rather than individual user accounts.
 Updates appear after refreshing the board.
+
+## Vercel and Supabase deployment
+
+Local development still uses SQLite when DATABASE_URL is empty. Vercel requires DATABASE_URL; it will refuse to use temporary SQLite storage. The server is exported for Vercel's Express support.
+
+1. Link the intended Vercel project and verify its owner.
+2. Configure a Supabase PostgreSQL transaction-pooler DATABASE_URL on the server and the app's ADMIN_TOKEN or TEAM_TOKEN. Never put these in public JavaScript.
+3. With the intended database connection configured securely, run `npm run db:migrate` once. Each app uses its own private schema. The schema script creates tables without deleting records.
+4. Deploy, then verify saving and reloading through the live application. Local SQLite records are not automatically copied to Supabase.
+
+Cloud storage has not been verified until a real configured database passes these checks. Keep all `.env` files and `.vercel` settings out of Git.
