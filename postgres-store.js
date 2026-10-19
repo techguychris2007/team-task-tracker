@@ -1,7 +1,8 @@
 // Cloud queries use a private schema; credentials stay on the server.
 const { Pool } = require("pg");
 module.exports = function createStore(schema, tables) {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3, connectionTimeoutMillis: 10000, idleTimeoutMillis: 20000 });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3, connectionTimeoutMillis: 10000, idleTimeoutMillis: 5000 });
+  if (process.env.VERCEL) require("@vercel/functions").attachDatabasePool(pool);
   function sql(source) {
     let index = 0;
     let query = source.replace(/\?/g, () => `$${++index}`);
